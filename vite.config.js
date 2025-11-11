@@ -4,7 +4,6 @@ import { fileURLToPath, URL } from 'url';
 import { ViteImageOptimizer } from 'vite-plugin-image-optimizer';
 import eslint from 'vite-plugin-eslint';
 import viteCompression from 'vite-plugin-compression';
-import { visualizer } from 'rollup-plugin-visualizer';
 import tailwindcss from '@tailwindcss/vite';
 
 const imageCacheDir = fileURLToPath(
@@ -48,12 +47,6 @@ export default defineConfig(({ mode }) => {
         },
       }),
       tailwindcss(),
-      visualizer({
-        filename: 'bundle-stats.html',
-        gzipSize: true,
-        brotliSize: true,
-        open: false,
-      }),
     ],
 
     resolve: {
