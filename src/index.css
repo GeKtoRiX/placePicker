@@ -57,7 +57,7 @@ header p {
 
   border: 2px solid #5d0909;
   border-radius: 8px;
-  min-width: 30rem;
+  min-width: 35rem;
   padding: 0;
   background: #d5c7bc;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.26);
@@ -83,9 +83,9 @@ header p {
   color: #5d0909;
 }
 #delete-confirmation p {
-  margin: 0 auto;
+  margin: 1.5rem auto;
   font-size: 1.15rem;
-  max-width: 38ch;
+  max-width: 40ch;
   color: #804242;
 }
 

@@ -7,10 +7,10 @@ export default function DeleteConfirmation({ onConfirm, onCancel }) {
       <p>Вы действительно хотите удалить это место?</p>
       <div id='confirmation-actions'>
         <button onClick={onCancel} className='button-text'>
-          No
+          Нет
         </button>
         <button onClick={onConfirm} className='button'>
-          Yes
+          ДА
         </button>
       </div>
     </div>
