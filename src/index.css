@@ -43,7 +43,7 @@ header h1 {
 header p {
   margin: 0 auto;
   font-size: 1.15rem;
-  max-width: 38ch;
+  max-width: 50ch;
   color: #9eb5b4;
 }
 

@@ -1,7 +1,9 @@
-import { useRef, useState } from 'react';
+import { useRef, useState, useEffect } from 'react';
 
 // Массив шаблонных мест для посещения.
-import { AVAILABLE_PLACES } from './data.js';
+import { AVAILABLE_PLACES } from '@/data.js';
+// Просчет расстояния от геолокации пользователя до геолокации мест.
+import { sortPlacesByDistance } from '@/loc.js';
 
 // Логотип приложения.
 import logoImg from './assets/logo.png';
@@ -13,13 +15,37 @@ import DeleteConfirmation from './components/DeleteConfirmation.jsx';
 // Компонент рендера шаблонных мест для посещения.
 import Places from './components/Places.jsx';
 
+// Масиив IDs(идентификаторов) выбранных пользователем.
+const storeIDs = JSON.parse(localStorage.getItem('selectedPlaces')) || [];
+// Массив выбранных мест пользователем.
+const StorePlaces = storeIDs.map((id) =>
+  AVAILABLE_PLACES.find((place) => place.id === id)
+);
+
 export default function App() {
   //Проброшенный хук useRef() в <dialog>
   const modal = useRef();
   // Проброшенный хук useRef() текущего выбранного места.
   const selectedPlace = useRef();
+  // Отсортированный массив выбранных мест по геолокации пользователя.
+  const [sortedPlaces, setSortedPlaces] = useState([]);
   // Массив выбранных мест.
-  const [pickedPlaces, setPickedPlaces] = useState([]);
+  const [pickedPlaces, setPickedPlaces] = useState(StorePlaces);
+
+  // Сортировка списка мест по геолокации пользователя.
+  // Чем место ближе, тем более высокую строку оно занимает.
+  useEffect(() => {
+    navigator.geolocation.getCurrentPosition((userPosition) => {
+      // latitude - широта(положение север/юг от экватора).
+      // longitude- это долгота(положение восток/запад от нулевого меридиана).
+      const sortedPlaces = sortPlacesByDistance(
+        AVAILABLE_PLACES,
+        userPosition.coords.latitude,
+        userPosition.coords.longitude
+      );
+      setSortedPlaces(sortedPlaces);
+    });
+  }, []);
 
   // Добавление нового места в массив.
   function handleSelectPlace(id) {
@@ -35,6 +61,17 @@ export default function App() {
       // Возврат модифицированного массива для перерендера.
       return [...prevPickedPlaces, place];
     });
+
+    // Парсинг(получение) массива ID(идентификаторов) из локального хранилища браузера.
+    const storedIDs = JSON.parse(localStorage.getItem('selectedPlaces')) || [];
+    // Исключение дублирование уже существующих записей ID(идентификаторов).
+    if (storedIDs.indexOf(id) === -1) {
+      // Запись нового массива ID(идентификаторов) в локальное хранилища браузера элементов ID.
+      localStorage.setItem(
+        'selectedPlaces',
+        JSON.stringify([...storedIDs, id])
+      );
+    }
   }
 
   // Открытие <dialog> и получение текущего выбранного места.
@@ -52,6 +89,14 @@ export default function App() {
     setPickedPlaces((prevPickedPlaces) =>
       prevPickedPlaces.filter((place) => place.id !== selectedPlace.current)
     );
+
+    // Удаление ID объекта из localStorage.
+    const storedIDs = JSON.parse(localStorage.getItem('selectedPlaces')) || [];
+    localStorage.setItem(
+      'selectedPlaces',
+      JSON.stringify(storedIDs.filter((id) => id !== selectedPlace.current))
+    );
+
     modal.current.close();
   }
 
@@ -68,8 +113,8 @@ export default function App() {
         <img src={logoImg} alt='Stylized globe' />
         <h1>PlacePicker</h1>
         <p>
-          Create your personal collection of places you would like to visit or
-          you have visited.
+          Создайте свою личную коллекцию мест, которые вы хотели бы посетить или
+          которые вы уже посетили.
         </p>
       </header>
       <main>
@@ -80,8 +125,9 @@ export default function App() {
           onSelectPlace={handleStartRemovePlace}
         />
         <Places
-          title='Available Places'
-          places={AVAILABLE_PLACES}
+          title='Доступные места'
+          fallbackText='Сортирование мест по геолокации пользователя...'
+          places={sortedPlaces}
           onSelectPlace={handleSelectPlace}
         />
       </main>
