@@ -3,6 +3,7 @@ import react from 'eslint-plugin-react';
 import reactHooks from 'eslint-plugin-react-hooks';
 import reactRefresh from 'eslint-plugin-react-refresh';
 import globals from 'globals';
+import prettierRecommended from 'eslint-plugin-prettier/recommended';
 
 export default [
   js.configs.recommended,
@@ -31,12 +32,13 @@ export default [
     rules: {
       'no-unused-vars': 'warn',
       'react/jsx-uses-vars': 'error',
-      'react-refresh/only-export-components': [
-        'warn',
-        { allowConstantExport: true },
-      ],
+      'react-refresh/only-export-components': ['warn', { allowConstantExport: true }],
       'react-hooks/rules-of-hooks': 'error',
       'react-hooks/exhaustive-deps': 'warn',
     },
   },
+  {
+    ignores: ['dist/**', 'node_modules/**', 'bundle-stats.html', '*.log'],
+  },
+  prettierRecommended,
 ];

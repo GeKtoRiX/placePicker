@@ -67,10 +67,7 @@ export default function App() {
     // Исключение дублирование уже существующих записей ID(идентификаторов).
     if (storedIDs.indexOf(id) === -1) {
       // Запись нового массива ID(идентификаторов) в локальное хранилища браузера элементов ID.
-      localStorage.setItem(
-        'selectedPlaces',
-        JSON.stringify([...storedIDs, id])
-      );
+      localStorage.setItem('selectedPlaces', JSON.stringify([...storedIDs, id]));
     }
   }
 
@@ -113,8 +110,8 @@ export default function App() {
         <img src={logoImg} alt='Stylized globe' />
         <h1>PlacePicker</h1>
         <p>
-          Создайте свою личную коллекцию мест, которые вы хотели бы посетить или
-          которые вы уже посетили.
+          Создайте свою личную коллекцию мест, которые вы хотели бы посетить или которые
+          вы уже посетили.
         </p>
       </header>
       <main>
