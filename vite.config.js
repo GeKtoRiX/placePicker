@@ -1,35 +1,20 @@
-import { defineConfig } from 'vite';
+import { defineConfig, loadEnv } from 'vite';
 import react from '@vitejs/plugin-react';
 import { fileURLToPath, URL } from 'url';
 import { ViteImageOptimizer } from 'vite-plugin-image-optimizer';
-import eslint from 'vite-plugin-eslint';
-import viteCompression from 'vite-plugin-compression';
 import tailwindcss from '@tailwindcss/vite';
 
 const imageCacheDir = fileURLToPath(
-  new URL('./node_modules/.cache/vite-plugin-image-optimizer', import.meta.url)
+  new URL('./.cache/vite-plugin-image-optimizer', import.meta.url)
 );
 
-export default defineConfig(({ mode }) => {
-  const isProd = mode === 'production';
+export default defineConfig(({ command }) => {
+  const isBuild = command === 'build';
 
   return {
     plugins: [
       react(),
-      eslint({
-        cache: true,
-        include: ['src/**/*.{js,jsx}'],
-        exclude: ['node_modules', 'dist'],
-        fix: true,
-      }),
-      viteCompression({
-        verbose: true,
-        disable: !isProd,
-        algorithm: 'brotliCompress',
-        ext: '.br',
-        threshold: 10240,
-      }),
-      isProd &&
+      isBuild &&
         ViteImageOptimizer({
           cache: true,
           cacheLocation: imageCacheDir,
@@ -79,27 +64,28 @@ export default defineConfig(({ mode }) => {
     },
 
     build: {
-      target: 'esnext',
       outDir: 'dist',
-      sourcemap: !isProd,
+      sourcemap: isBuild ? 'hidden' : true,
       cssCodeSplit: true,
       chunkSizeWarningLimit: 1000,
-      minify: isProd ? 'esbuild' : false,
-      cssMinify: isProd ? 'lightningcss' : false,
+      minify: isBuild ? 'esbuild' : false,
+      cssMinify: isBuild,
       rollupOptions: {
         output: {
-          manualChunks: {
-            react: ['react', 'react-dom'],
-            vendor: ['axios', 'zustand', 'react-router-dom'],
+          manualChunks(id) {
+            if (!id.includes('node_modules')) return;
+            const normalized = id.replace(/\\/g, '/');
+            const [, afterNodeModules] = normalized.split('node_modules/');
+            if (!afterNodeModules) return;
+            const parts = afterNodeModules.split('/');
+            if (!parts.length) return;
+            const pkg =
+              parts[0].startsWith('@') && parts.length > 1
+                ? `${parts[0]}/${parts[1]}`
+                : parts[0];
+            return `vendor-${pkg.replace('@', '').replace('/', '-')}`;
           },
         },
-      },
-    },
-
-    optimizeDeps: {
-      include: ['react', 'react-dom'],
-      esbuildOptions: {
-        target: 'esnext',
       },
     },
     esbuild: {
