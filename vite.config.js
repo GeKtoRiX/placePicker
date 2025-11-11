@@ -29,25 +29,35 @@ export default defineConfig(({ mode }) => {
         ext: '.br',
         threshold: 10240,
       }),
-      ViteImageOptimizer({
-        cache: true,
-        cacheLocation: imageCacheDir,
-        jpeg: { quality: 85 },
-        jpg: { quality: 85 },
-        png: { quality: 90 },
-        webp: { quality: 90, lossless: false },
-        avif: { quality: 80 },
-        svg: {
-          multipass: true,
-          plugins: [
-            { name: 'preset-default' },
-            { name: 'removeViewBox', active: false },
-            'removeUnusedNS',
-          ],
-        },
-      }),
+      isProd &&
+        ViteImageOptimizer({
+          cache: true,
+          cacheLocation: imageCacheDir,
+          jpeg: { quality: 85 },
+          jpg: { quality: 85 },
+          png: { quality: 90 },
+          webp: { quality: 90, lossless: false },
+          avif: { quality: 80 },
+          svg: {
+            multipass: true,
+            plugins: [
+              { name: 'preset-default' },
+              { name: 'removeViewBox', active: false },
+              'removeUnusedNS',
+            ],
+          },
+        }),
       tailwindcss(),
-    ],
+    ].filter(Boolean),
+
+    css: {
+      lightningcss: {
+        browsers: '>=0.25%, not dead',
+        drafts: {
+          nesting: true,
+        },
+      },
+    },
 
     resolve: {
       alias: {
@@ -75,6 +85,7 @@ export default defineConfig(({ mode }) => {
       cssCodeSplit: true,
       chunkSizeWarningLimit: 1000,
       minify: isProd ? 'esbuild' : false,
+      cssMinify: isProd ? 'lightningcss' : false,
       rollupOptions: {
         output: {
           manualChunks: {
