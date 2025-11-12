@@ -1,12 +1,12 @@
 import { useRef, useState, useEffect } from 'react';
 
 // Массив шаблонных мест для посещения.
-import { AVAILABLE_PLACES } from '@/data.js';
+import { AVAILABLE_PLACES } from '@/data/data.js';
 // Просчет расстояния от геолокации пользователя до геолокации мест.
-import { sortPlacesByDistance } from '@/loc.js';
+import { sortPlacesByDistance } from '@/utils/loc.js';
 
 // Логотип приложения.
-import logoImg from './assets/logo.png';
+import logoImg from './assets/img/logo.png';
 
 // Модальное окно <dialog>
 import Modal from './components/Modal.jsx';
