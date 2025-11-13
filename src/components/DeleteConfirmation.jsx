@@ -1,6 +1,21 @@
+import { useEffect } from 'react';
+import ProgressBar from './ProgressBar';
+
+const TIMER = 5000;
+
 export default function DeleteConfirmation({ onConfirm, onCancel }) {
   // onCancel -  Закрытие всплывающего окна <dialog>
   // onConfirm - Удаление изображения/ Закрытие всплывающего окна
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      onConfirm();
+    }, TIMER);
+    return () => {
+      clearTimeout(timer);
+    };
+  }, [onConfirm]);
+
   return (
     <div id='delete-confirmation'>
       <h2>Вы уверены?</h2>
@@ -13,6 +28,7 @@ export default function DeleteConfirmation({ onConfirm, onCancel }) {
           ДА
         </button>
       </div>
+      <ProgressBar timer={TIMER} />
     </div>
   );
 }

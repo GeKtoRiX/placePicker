@@ -1,4 +1,4 @@
-import { useRef, useState, useEffect } from 'react';
+import { useRef, useState, useEffect, useCallback } from 'react';
 
 // Массив шаблонных мест для посещения.
 import { AVAILABLE_PLACES } from '@/data/data.js';
@@ -23,10 +23,10 @@ const StorePlaces = storeIDs.map((id) =>
 );
 
 export default function App() {
-  //Проброшенный хук useRef() в <dialog>
-  const modal = useRef();
   // Проброшенный хук useRef() текущего выбранного места.
   const selectedPlace = useRef();
+  // Хук отслеживания состояния открытия окна <dialog>
+  const [isModelOpen, setIsModelOpen] = useState(false);
   // Отсортированный массив выбранных мест по геолокации пользователя.
   const [sortedPlaces, setSortedPlaces] = useState([]);
   // Массив выбранных мест.
@@ -70,36 +70,39 @@ export default function App() {
       localStorage.setItem('selectedPlaces', JSON.stringify([...storedIDs, id]));
     }
   }
-
   // Открытие <dialog> и получение текущего выбранного места.
   function handleStartRemovePlace(id) {
-    modal.current.open();
+    setIsModelOpen(true);
     selectedPlace.current = id;
   }
+
   // Закрытие всплывающего окна <dialog>
   function handleStopRemovePlace() {
-    modal.current.close();
+    setIsModelOpen(false);
   }
-  // Удаление места.
-  function handleRemovePlace() {
-    // Возврат модифицированного массива для перерендера.
-    setPickedPlaces((prevPickedPlaces) =>
-      prevPickedPlaces.filter((place) => place.id !== selectedPlace.current)
-    );
 
-    // Удаление ID объекта из localStorage.
-    const storedIDs = JSON.parse(localStorage.getItem('selectedPlaces')) || [];
-    localStorage.setItem(
-      'selectedPlaces',
-      JSON.stringify(storedIDs.filter((id) => id !== selectedPlace.current))
-    );
+  const handleRemovePlace = useCallback(
+    // Удаление места.
+    function handleRemovePlace() {
+      // Возврат модифицированного массива для перерендера.
+      setPickedPlaces((prevPickedPlaces) =>
+        prevPickedPlaces.filter((place) => place.id !== selectedPlace.current)
+      );
 
-    modal.current.close();
-  }
+      // Удаление ID объекта из localStorage.
+      const storedIDs = JSON.parse(localStorage.getItem('selectedPlaces')) || [];
+      localStorage.setItem(
+        'selectedPlaces',
+        JSON.stringify(storedIDs.filter((id) => id !== selectedPlace.current))
+      );
+      setIsModelOpen(false);
+    },
+    []
+  );
 
   return (
     <>
-      <Modal ref={modal}>
+      <Modal open={isModelOpen}>
         <DeleteConfirmation
           onCancel={handleStopRemovePlace}
           onConfirm={handleRemovePlace}
